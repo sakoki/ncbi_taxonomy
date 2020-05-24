@@ -1,4 +1,5 @@
 import pandas as pd
+from collections import deque
 from ncbi_taxonomy.IO import read_nodes_dmp, read_names_dmp
 
 class TaxonomyNode():
@@ -31,7 +32,7 @@ class NCBI_Taxonomy():
         self.nodes = read_nodes_dmp(self.file_path + 'nodes.dmp').set_index("tax_id")
         self.names = read_names_dmp(self.file_path + 'names.dmp')
     
-    def get_tax_id(self, query):
+    def get_tax_id(self, name):
         """Get the tax_id from names table
         
         Parameters
@@ -43,16 +44,16 @@ class NCBI_Taxonomy():
         tax_id : int
         """
         
-        hits = self.names.loc[lambda df: df["name_txt"] == query]
+        hits = self.names.loc[lambda df: df["name_txt"] == name]
         if hits.shape[0] > 1:  # multiple matches
             msg = [f"Multiple matches to query found:",
                    f"{hits}",
                    "Please select tax_id: "]
-            return input("\n".join(msg))
+            return int(input("\n".join(msg)))
         elif hits.shape[0] == 1:
             return hits.tax_id.values[0]
         else:
-            raise IndexError("Invalid query - not found or possible typo")
+            raise IndexError("Invalid name - not found or possible typo")
             
     def get_name_txt(self, tax_id, name_class):
         """Given a tax_id, get the name_txt of specific name_class from the names table
@@ -72,16 +73,12 @@ class NCBI_Taxonomy():
                 lambda df: (df["tax_id"] == tax_id) & (df["name_class"] == name_class)].name_txt.values[0]
         except IndexError:
             print("Invalid tax_id - not found or possible typo")
-            
+    
     def get_node_info(self, node):
         """Look up the tax_id in the nodes table for additional information
         
         Parameters
         ----------
-        node : TaxonomyNode
-        
-        Returns
-        -------
         node : TaxonomyNode
         """
         
@@ -90,14 +87,53 @@ class NCBI_Taxonomy():
         node.parent_tax_id = result['parent_tax_id']
         node.name_txt = self.get_name_txt(node.tax_id, name_class="scientific name")
         return node
-            
-#     def get_LCA(self, queries: List[TaxonomyNode]):
-#         """Get the lowest common ancestor of selected nodes"""
-#         pass
-#         nodes_seen = set()
+    
+    def create_node_objects(self, name_list, from_tax_id=False):
+        """Create node objects from a list of names or tax_id in the taxonomy database
         
-#         for query in queries:
-#             query_node = self.get_node_info(TaxonomyNode(self.get_tax_id(query)))
-#             if query_node.parent_tax_id not in nodes_seen:
-#                 nodes_seen.add(query_node.parent_tax_id)
+        Parameters
+        ----------
+        names : list of str or int
+            list of names (str) or tax_id (int)
+        from_tax_id : bool
+            True if name_list contains tax_ids
+            
+        Returns
+        -------
+        nodes : list of TaxonomyNode
+        """
+        
+        nodes = []
+        
+        for name in name_list:
+            tax_id = self.get_tax_id(name) if not from_tax_id else name
+            nodes.append(self.get_node_info(TaxonomyNode(tax_id)))
+        return nodes
+      
+    def get_LCA(self, node_list):
+        """Get the lowest common ancestor of given nodes
+        
+        Parameters
+        ----------
+        node_list : list of TaxonomyNode
+        
+        Returns
+        -------
+        node : TaxonomyNode
+            Lowest common ancestor
+        """
+        nodes_seen = set()
+        
+        queue = deque()
+        for node in node_list:
+            queue.append(node)
+        
+        while queue:
+            node = queue.popleft()
+            if node.tax_id in nodes_seen:
+                return node
+            nodes_seen.add(node.tax_id)
+            parent_node = self.get_node_info(TaxonomyNode(node.parent_tax_id))
+            queue.append(parent_node)
 
+# if __name__ == "__main__":
