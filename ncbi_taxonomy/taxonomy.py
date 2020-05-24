@@ -138,5 +138,3 @@ class NCBI_Taxonomy():
             nodes_seen.add(node.tax_id)
             parent_node = self.get_node_info(TaxonomyNode(node.parent_tax_id))
             queue.append((parent_node, matches))
-
-# if __name__ == "__main__":
