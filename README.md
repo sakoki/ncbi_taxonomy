@@ -23,7 +23,7 @@ File Structure
       ├── IO.py
       └── taxonomy.py
 
-Download the ncbi data from: ()
+Download the ncbi data from: (https://ftp.ncbi.nih.gov/pub/taxonomy/taxdump.tar.gz)
 
 # Getting the lowest common ancestor
 
