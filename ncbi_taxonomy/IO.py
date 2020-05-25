@@ -10,7 +10,7 @@ def read_nodes_dmp(fname):
 
     Returns
     -------
-    DataFrame
+    pd.DataFrame
     """
     df = pd.read_csv(fname, sep="|", header=None, index_col=False,
                      names=['tax_id', 
@@ -40,7 +40,7 @@ def read_names_dmp(fname):
 
     Returns
     -------
-    DataFrame 
+    pd.DataFrame 
     """
     df = pd.read_csv(fname, sep="|", header=None, index_col=False,
                     names=["tax_id",
