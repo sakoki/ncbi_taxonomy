@@ -27,11 +27,12 @@ Download the ncbi data from: (https://ftp.ncbi.nih.gov/pub/taxonomy/taxdump.tar.
 
 # Getting the lowest common ancestor
 
-1.  Import taxonomy.py
-2.  To start interacting with the ncbi taxonomy data, load it into the environment  by calling. We then assign that object to variable `session`.
+1.  Import taxonomy
+2.  To start interacting with the ncbi taxonomy data we need to first establish a connection to the data. Here we create the object `ncbi_taxonomy` and assign it to a variable called `session`. Once the session is created, load the required files into the environment. 
 
 ```python
 session = taxonomy.ncbi_taxonomy(file_path="<insert_file_path>")
+session.load_taxonomy_data()
 ```
 
 3.  Prepare your input (a list of names or tax_id's) as a list of TaxonomyNode objects. Here we pass in the acronyms MERS and SARS.
