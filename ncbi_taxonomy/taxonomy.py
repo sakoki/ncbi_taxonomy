@@ -122,19 +122,17 @@ class NCBI_Taxonomy():
         node : TaxonomyNode
             Lowest common ancestor
         """
-        nodes_seen = set()
+        nodes_seen = {}
         node_count = len(node_list)
         
         queue = deque()
         for node in node_list:
-            queue.append((node, 1))  # node, matches 
+            queue.append(node)
         
         while queue:
-            node, matches = queue.popleft()
-            if node.tax_id in nodes_seen:
-                matches += 1
-                if matches == node_count:
-                    return node
-            nodes_seen.add(node.tax_id)
+            node = queue.popleft()
+            nodes_seen[node.tax_id] = nodes_seen.get(node.tax_id, 0) + 1 
+            if nodes_seen[node.tax_id] == node_count:
+                return node
             parent_node = self.get_node_info(TaxonomyNode(node.parent_tax_id))
-            queue.append((parent_node, matches))
+            queue.append(parent_node)
