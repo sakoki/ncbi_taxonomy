@@ -18,7 +18,7 @@ class TaxonomyNode():
         return "\n".join([f"tax_id: {self.tax_id}", 
                           f"rank: {self.rank}", 
                           f"name_txt: {self.name_txt}",
-                          f"parent_txt_id: {self.parent_tax_id}"])
+                          f"parent_tax_id: {self.parent_tax_id}"])
 
 class NCBI_Taxonomy():
     """Interact with the NCBI taxonomy data"""
